@@ -1,0 +1,21 @@
+/* compradorCarrito.css */
+
+/* Estilo personalizado para el botón Ir a pagar */
+.btn-pagar {
+  background-color: #5E0B15 !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+.btn-pagar:hover {
+  background-color: #490811 !important; /* un tono más oscuro para hover */
+}
+  
+.list-group-item img {
+  width: 60px;             /* ancho fijo */
+  height: 60px;            /* alto fijo */
+  object-fit: cover;       /* recorta manteniendo proporción */
+  border-radius: 4px;      /* esquinas suavizadas */
+  margin-right: 1rem;      /* separación del texto */
+  flex-shrink: 0;          /* que no se reduzcan más */
+}

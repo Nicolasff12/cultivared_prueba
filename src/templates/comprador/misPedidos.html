@@ -1,0 +1,36 @@
+{% extends 'comprador/baseComprador.html' %}
+{% block body %}
+<div class="container py-5">
+  <h2 class="mb-4">Mis pedidos</h2>
+
+  {% if pedidos|length == 0 %}
+    <div class="text-center py-5">
+      <p class="fs-4 text-muted">Aún no has realizado ningún pedido.</p>
+      <a href="{{ url_for('comprador_blueprint.comprador') }}" class="btn btn-primary">
+        Ir a productos
+      </a>
+    </div>
+  {% else %}
+    {% for pedido in pedidos %}
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>Pedido #{{ pedido.id }}</div>
+          <div><small class="text-muted">{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small></div>
+          <div class="fw-bold">$ {{ '%.2f'|format(pedido.total) }}</div>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for item in pedido.items %}
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <strong>{{ item.nombre }}</strong>
+                <div class="small text-muted">x{{ item.cantidad }}</div>
+              </div>
+              <div>$ {{ '%.2f'|format(item.precio * item.cantidad) }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

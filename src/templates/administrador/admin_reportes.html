@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+{% extends 'administrador/baseAdmin.html' %}
+{% block body %}
+
+<!-- Enlace al CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/adminperfil.css') }}">
+
+<div class="container d-flex flex-column align-items-center justify-content-start" style="min-height: 80vh;">
+  <h1 id="panel-title" class="text-center mb-4" style="margin-top: 80px;">REPORTE GENERAL</h1>
+
+  <div class="mb-4 text-center">
+    <p>Descarga el reporte con información de usuarios, productos y transacciones.</p>
+    <a href="/generar_pdf" class="btn btn-primary">Descargar Reporte PDF</a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h3>📌 Usuarios</h3>
+      <ul>
+        {% for usuario in usuarios %}
+          <li>{{ usuario.id }} - {{ usuario.nombre }} {{ usuario.apellido }} | {{ usuario.email }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-6">
+      <h3>📌 Productos</h3>
+      <ul>
+        {% for producto in productos %}
+          <li>{{ producto.id }} - {{ producto.nombre }} | Stock: {{ producto.cantidad }} | Precio: {{ producto.precio }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <h3>📌 Transacciones</h3>
+      <ul>
+        {% for transaccion in transacciones %}
+          <li>ID: {{ transaccion.id }} | Usuario: {{ transaccion.id_usuario }} | Total: {{ transaccion.total }} | Estado: {{ transaccion.estado }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -2,51 +2,40 @@
 {% block body %}
 
 {% block customCSS %}
-{% endblock %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/vendedorHistorialPedidos.css') }}">
+<link rel="stylesheet" href="https://bootswatch.com/5/litera/bootstrap.min.css"> 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/historialPedido.css') }}">
 
+{% endblock %}
 <body>
-  <div class="container">
-    <h1>Historial de Pedidos</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>ID Pedido</th>
-          <th>Cliente</th>
-          <th>Fecha</th>
-          <th>Productos</th>
-          <th>Total</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>#001</td>
-          <td>Juan Pérez</td>
-          <td>2025-04-18</td>
-          <td>Tomate, Lechuga</td>
-          <td>$25.000</td>
-          <td><span class="status entregado">Entregado</span></td>
-        </tr>
-        <tr>
-          <td>#002</td>
-          <td>Ana Gómez</td>
-          <td>2025-04-17</td>
-          <td>Zanahoria, Papa</td>
-          <td>$18.000</td>
-          <td><span class="status pendiente">Pendiente</span></td>
-        </tr>
-        <tr>
-          <td>#003</td>
-          <td>Carlos Ruiz</td>
-          <td>2025-04-15</td>
-          <td>Cebolla, Maíz</td>
-          <td>$20.000</td>
-          <td><span class="status cancelado">Cancelado</span></td>
-        </tr>
-      </tbody>
-      <a href="/VENDEDOR" class="btn btn-secondary btn-lg">Atrás</a>
-    </table>
-  </div>
+    <h1>Productos vendidos</h1>
+    {% if historial %}
+        <table border="1" cellpadding="5">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Fecha de pedido</th>
+                    <th>Comprador</th>
+                    <th>Total item</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in historial %}
+                <tr>
+                    <td>{{ item.producto.nombre }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ '%.2f'|format(item.precio) }}</td>
+                    <td>{{ item.pedido.fecha.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ item.pedido.usuario.nombre }}</td>
+                    <td>${{ '%.2f'|format(item.cantidad * item.precio) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay ventas registradas aún.</p>
+    {% endif %}
+    <a href="/VENDEDOR" class="btn btn-secondary btn-lg">Atrás</a>
 </body>
 {% endblock %}

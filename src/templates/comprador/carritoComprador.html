@@ -1,0 +1,89 @@
+{% extends 'comprador/baseComprador.html' %}
+{% block body %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carrito</title>
+  <link rel="stylesheet" href="https://bootswatch.com/5/litera/bootstrap.min.css"> 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/compradorCarrito.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <h2 class="mb-4">Mi carrito</h2>
+      
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      
+        {% if carrito_items|length == 0 %}
+          <div class="text-center py-5">
+            <p class="fs-4 text-muted">Tu carrito está vacío.</p>
+            <a href="{{ url_for('comprador_blueprint.comprador') }}" class="btn btn-primary">
+              Ir a productos
+            </a>
+          </div>
+        {% else %}
+          <div class="row">
+            <!-- IZQUIERDA: listado -->
+            <div class="col-md-8 mb-4">
+              <ul class="list-group">
+                {% for item in carrito_items %}
+                <li class="list-group-item d-flex align-items-center">
+                  <img src="{{ url_for('comprador_blueprint.imagen_producto', producto_id=item.id) }}"
+                    class="card-img-top"
+                    alt="Imagen de {{ item.nombre }}">
+                  <div class="flex-grow-1">
+                    <h6>{{ item.nombre }}</h6>
+                    <small class="text-muted">{{ item.descripcion }}</small>
+                  </div>
+                  <form action="{{ url_for('comprador_blueprint.update_cart', product_id=item.id) }}" method="post" class="d-flex align-items-center me-4">
+                    <input type="number" name="quantity" value="{{ item.cantidad }}" min="0" class="form-control form-control-sm" style="width: 60px;">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm ms-2">OK</button>
+                  </form>
+                  <div class="fw-bold">${{ item.subtotal }}</div>
+                  <form action="{{ url_for('comprador_blueprint.remove_from_cart', product_id=item.id) }}" method="post" class="ms-3">
+                    <button type="submit" class="btn btn-link text-danger">Eliminar</button>
+                  </form>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+      
+            <!-- DERECHA: total -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Resumen</h5>
+                  <hr>
+                  <div class="d-flex justify-content-between">
+                    <span>Total:</span>
+                    <span>${{ carrito_total }}</span>
+                  </div>
+                    <form action="{{ url_for('comprador_blueprint.checkout') }}" method="post">
+                      <button type="submit" class="btn btn-pagar w-100 mt-3">
+                        Ir a pagar
+                      </button>
+                    </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+</body>
+</html>
+
+
+
+{% endblock %}

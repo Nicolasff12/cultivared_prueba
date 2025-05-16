@@ -1,0 +1,41 @@
+.resumen-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 60px 80px;
+    background: linear-gradient(to bottom right, #f0f4f7, #ffffff);
+    min-height: 90vh;
+}
+
+.card-resumen {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;     /* Centrado horizontal */
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.card-resumen:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-resumen h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #1d3557;
+    font-weight: 600;
+}
+
+.valor {
+    font-size: 36px;
+    font-weight: bold;
+    color: #5E0B15;
+}
+

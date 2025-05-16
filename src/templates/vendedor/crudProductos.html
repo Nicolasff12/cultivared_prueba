@@ -3,12 +3,14 @@
 
 {% block customCSS %}
 <link rel="stylesheet" href="https://bootswatch.com/5/litera/bootstrap.min.css"> 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/crudPro.css') }}">
+
 {% endblock %}
 
 <div class="container">
     <div class="row">
         <div class="col">
-            <form action="/MisProductos">
+           
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -37,9 +39,13 @@
                                    
                                     </td>
                                     <td>
-                                        <a href="/editarProducto/{{ producto[0] }}" title="Editar" class="btn btn-primary btn-sm">Editar</a>
-                                        <a href="/eliminarProducto/{{ producto[0] }}" title="Eliminar" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?')">Eliminar</a>
-                                    </td>
+                                        <a href="{{ url_for('vendedor_blueprint.editar_producto', id=producto[0]) }}" title="Editar" class="btn btn-primary btn-sm">Editar</a>
+                                        <form action="{{ url_for('vendedor_blueprint.eliminar', id=producto[0]) }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este producto?')">
+                                                <span class="ms-2">Eliminar</span>
+                                            </button>
+                                        </form>
+                                            </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

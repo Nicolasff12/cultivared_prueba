@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Blueprint, request, redirect, url_for, session
+from flask import Flask, render_template, Blueprint, request, redirect, url_for, session,flash
 from config import get_connection  # Importamos la conexión a PostgreSQL
 
 main = Blueprint('autenticacion_blueprint', __name__)
@@ -24,25 +24,58 @@ def form():
         genero = request.form['genero']
         telefono = request.form['telefono']
         email = request.form['email']
-        contrasena = request.form['contrasena1']
+        contrasena1 = request.form['contrasena1']
+        contrasena2 = request.form['contrasena2']
         rol = request.form['rol']
+
+        errores = []
 
         conn = get_connection()
         cur = conn.cursor()
 
-        # Insertar el usuario en la base de datos sin validaciones
+        # Validaciones
+        cur.execute('SELECT id FROM usuarios WHERE id = %s', (ide,))
+        if cur.fetchone():
+            errores.append("La identificación ya está registrada.")
+
+        cur.execute('SELECT email FROM usuarios WHERE email = %s', (email,))
+        if cur.fetchone():
+            errores.append("El correo electrónico ya está registrado.")
+
+        cur.execute('SELECT telefono FROM usuarios WHERE telefono = %s', (telefono,))
+        if cur.fetchone():
+            errores.append("El número de celular ya está registrado.")
+
+        if contrasena1 != contrasena2:
+            errores.append("Las contraseñas no coinciden.")
+
+        # Mostrar errores si hay
+        if errores:
+            mensaje = "<ul>"
+            for error in errores:
+                mensaje += f"<li>{error}</li>"
+            mensaje += "</ul>"
+
+            flash(mensaje, "danger")
+            cur.close()
+            conn.close()
+            return redirect('/CULTIVARED/Registro')
+
+        # Insertar el usuario si no hay errores
         cur.execute("""
             INSERT INTO usuarios (id, nombre, apellido, genero, telefono, email, contrasena, rol)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (ide, nombre, apellido, genero, telefono, email, contrasena, rol))
+        """, (ide, nombre, apellido, genero, telefono, email, contrasena1, rol))
 
         conn.commit()
         cur.close()
         conn.close()
 
-        return "<script>alert('Usuario registrado correctamente'); window.location.href = '/CULTIVARED';</script>"
+        return "<script>alert('Usuario registrado correctamente'); window.location.href = '/CULTIVARED/login';</script>"
+
 
     return render_template("inicio.html")
+
 
 @main.route('/login', methods=['GET', 'POST'])
 def log():

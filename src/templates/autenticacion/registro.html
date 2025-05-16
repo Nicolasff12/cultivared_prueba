@@ -5,111 +5,136 @@
 {% endblock %}
 
 {% block body %}
-<section class="min-vh-100 d-flex align-items-center justify-content-center gradient-custom">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 col-xl-6">
-        <div class="card shadow-lg p-4" style="border-radius: 15px;">
-          <div class="card-body">
-            <h3 class="mb-4 text-center fw-bold">Regístrate</h3>
 
-            <form action="/CULTIVARED/formulario" method="POST">
-              <!-- Datos personales -->
-              <fieldset>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="text" class="form-control" id="identificacion" name="identificacion" placeholder="Ej: 102342" required>
-                      <label for="identificacion">Identificación</label>
+  <section class="min-vh-100 d-flex align-items-center justify-content-center gradient-custom">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+          <div class="card shadow-lg p-4" style="border-radius: 15px;">
+            <div class="card-body">
+              <h3 class="mb-4 text-center fw-bold">Regístrate</h3>
+ <!-- Flash Messages -->
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+   {% for category, message in messages %}
+     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+       {{ message|safe }}
+       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+     </div>
+   {% endfor %}
+ {% endif %}
+{% endwith %}
+
+              <form action="/CULTIVARED/formulario" method="POST">
+                <!-- Datos personales -->
+                <fieldset>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="text" class="form-control" id="identificacion" name="identificacion" placeholder="Ej: 102342" required>
+                        <label for="identificacion">Identificación</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Jose" required>
+                        <label for="nombre">Nombre</label>
+                      </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Jose" required>
-                      <label for="nombre">Nombre</label>
+
+                  <div class="row g-3 mt-2">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ej: Torres" required>
+                        <label for="apellido">Apellido</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                      <div class="form-check me-3">
+                        <input class="form-check-input" type="radio" name="genero" id="generoMujer" value="Mujer" checked>
+                        <label class="form-check-label" for="generoMujer">Mujer</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="genero" id="generoHombre" value="Hombre">
+                        <label class="form-check-label" for="generoHombre">Hombre</label>
+                      </div>
                     </div>
                   </div>
+                </fieldset>
+
+                <!-- Contacto -->
+                <fieldset class="mt-3">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@gmail.com" required>
+                        <label for="email">Email</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="32455230453" required>
+                        <label for="telefono">Teléfono</label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Contraseña -->
+                <fieldset class="mt-3">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="password" class="form-control" id="contrasena1" name="contrasena1" placeholder="Contraseña" required>
+                        <label for="contrasena1">Contraseña</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input type="password" class="form-control" id="contrasena2" name="contrasena2" placeholder="Confirmar Contraseña" required>
+                        <label for="contrasena2">Confirmar Contraseña</label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Rol -->
+                <fieldset class="mt-3">
+                  <div class="form-floating">
+                    <select class="form-select" id="rol" name="rol" required>
+                      <option value="" disabled selected>Elige una opción</option>
+                      <option value="Comprador">Comprador</option>
+                      <option value="Vendedor">Vendedor</option>
+                    </select>
+                    <label for="rol">Rol</label>
+                  </div>
+                </fieldset>
+
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg w-100" id="enviarRegistro">Enviar</button>
                 </div>
-
-                <div class="row g-3 mt-2">
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ej: Torres" required>
-                      <label for="apellido">Apellido</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6 d-flex align-items-center">
-                    <div class="form-check me-3">
-                      <input class="form-check-input" type="radio" name="genero" id="generoMujer" value="Mujer" checked>
-                      <label class="form-check-label" for="generoMujer">Mujer</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="genero" id="generoHombre" value="Hombre">
-                      <label class="form-check-label" for="generoHombre">Hombre</label>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Contacto -->
-              <fieldset class="mt-3">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@gmail.com" required>
-                      <label for="email">Email</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="32455230453" required>
-                      <label for="telefono">Teléfono</label>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Contraseña -->
-              <fieldset class="mt-3">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="password" class="form-control" id="contrasena1" name="contrasena1" placeholder="Contraseña" required>
-                      <label for="contrasena1">Contraseña</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="password" class="form-control" id="contrasena2" name="contrasena2" placeholder="Confirmar Contraseña" required>
-                      <label for="contrasena2">Confirmar Contraseña</label>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Rol -->
-              <fieldset class="mt-3">
-                <div class="form-floating">
-                  <select class="form-select" id="rol" name="rol" required>
-                    <option value="" disabled selected>Elige una opción</option>
-                    <option value="Comprador">Comprador</option>
-                    <option value="Vendedor">Vendedor</option>
-                  </select>
-                  <label for="rol">Rol</label>
-                </div>
-              </fieldset>
-
-              <div class="text-center mt-4">
-                <button type="submit" class="btn btn-primary btn-lg w-100" id="enviarRegistro">Enviar</button>
-              </div>
-              <p class="text-center mt-3">¿Ya tienes cuenta? <a href="/CULTIVARED/IniciaSesion" class="text-decoration-none">Inicia Sesión</a></p>
-
-            </form>
+                <p class="text-center mt-3">¿Ya tienes cuenta? <a href="/CULTIVARED/IniciaSesion" class="text-decoration-none">Inicia Sesión</a></p>
+              </form>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
+  <script>
+    // Espera 4 segundos y oculta el mensaje flash con efecto fade
+    setTimeout(() => {
+      const flashMessages = document.querySelectorAll('.alert');
+      flashMessages.forEach(msg => {
+        msg.classList.remove('show');
+        msg.classList.add('fade');
+        setTimeout(() => msg.remove(), 1000); // Remueve del DOM después
+      });
+    }, 4000); // 4 segundos
+  </script>
+  
 {% endblock %}
+
+

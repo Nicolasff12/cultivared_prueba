@@ -1,7 +1,10 @@
-from flask import Flask, render_template, Blueprint, request, redirect, url_for, session
+from types import SimpleNamespace
 from config import get_connection  # Importamos la conexión a PostgreSQL
-from flask import send_file
 import io
+from flask import Flask, flash, render_template, Blueprint, request, redirect, send_file, url_for, session
+from models import ItemPedido, Pedido, Usuarios, db, Producto
+from sqlalchemy.orm import joinedload
+
 
 main = Blueprint('vendedor_blueprint', __name__)
 #
@@ -40,11 +43,11 @@ def registro_productos():
 
     return render_template('/vendedor/regitrosProducto.html', user=user)
 
-
 @main.route('/formularioProductos', methods=['GET', 'POST'])
 def form():
     if 'id' not in session:
-        return """<script> alert("Por favor, inicie sesión."); window.location.href = "/CULTIVARED/login"; </script>"""
+        flash("Por favor, inicie sesión.", "warning")
+        return redirect(url_for('autenticacion.login'))
 
     if request.method == 'POST':
         try:
@@ -77,12 +80,14 @@ def form():
             cur.close()
             conn.close()
 
-            return redirect(url_for('vendedor_blueprint.mis_productos'))
+            return "<script>alert('=Producto registrado correctamente'); window.location.href = '/VENDEDOR/RegistroProductos';</script>"
 
         except Exception as e:
-            return f"<script>alert('Error al registrar el producto: {str(e)}'); window.location.href = '/VENDEDOR/RegistroProductos';</script>"
+            flash(f"❌ Error al registrar el producto: {str(e)}", "danger")
+            return redirect(url_for('vendedor_blueprint.registro_productos'))
 
     return redirect(url_for('vendedor_blueprint.registro_productos'))
+
 
 @main.route('/imagen_producto/<int:producto_id>')
 def imagen_producto(producto_id):
@@ -117,34 +122,84 @@ def mis_productos():
     conn.close()
 
     return render_template('/vendedor/crudProductos.html', produ=data, user=user)
-                
 
-@main.route('/HistorialPedidos')
-def historial_pedidos():
-    if 'id' not in session:
-        return """<script> alert("Por favor, inicie sesión."); window.location.href = "/CULTIVARED/login"; </script>"""
-
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM usuarios WHERE id = %s', (session['id'],))
-    user = cur.fetchone()
-    cur.close()
-    conn.close()
-    return render_template('/vendedor/historialPedidos.html', user=user)
-
+def obtener_historial_pedidos_vendedor(id_vendedor):
+    historial = (
+        db.session.query(ItemPedido)
+        .join(Producto)
+        .join(Pedido)
+        .join(Usuarios)  # comprador
+        .filter(Producto.id_vendedor == id_vendedor)
+        .options(
+            joinedload(ItemPedido.producto),
+            joinedload(ItemPedido.pedido).joinedload(Pedido.usuario)
+        )
+        .order_by(Pedido.fecha.desc())
+        .all()
+    )
+    return historial
 
 @main.route('/ResumenVentas')
-def resumen_ventas():
+def resumenVentas():
     if 'id' not in session:
-        return """<script> alert("Por favor, inicie sesión."); window.location.href = "/CULTIVARED/login"; </script>"""
-
+        flash("Por favor, inicia sesión.", "warning")
+        return redirect(url_for('autenticacion.login'))
+    
     conn = get_connection()
     cur = conn.cursor()
     cur.execute('SELECT * FROM usuarios WHERE id = %s', (session['id'],))
     user = cur.fetchone()
     cur.close()
     conn.close()
-    return render_template('/vendedor/resumenVentas.html',user=user)
+
+    id_vendedor = session['id']
+    historial = obtener_historial_pedidos_vendedor(id_vendedor)
+
+    # Calcular resumen
+    total_ganancias = sum(item.precio * item.cantidad for item in historial)
+    total_productos = sum(item.cantidad for item in historial)
+
+    productos_vendidos = {}
+    for item in historial:
+        nombre = item.producto.nombre
+        productos_vendidos[nombre] = productos_vendidos.get(nombre, 0) + item.cantidad
+
+    if productos_vendidos:
+        producto_mas_vendido = max(productos_vendidos.items(), key=lambda x: x[1])[0]
+    else:
+        producto_mas_vendido = "Ninguno"
+
+    resumen = {
+        'total_ganancias': total_ganancias,
+        'total_productos': total_productos,
+        'producto_mas_vendido': producto_mas_vendido
+    }
+
+    return render_template(
+        'vendedor/ventasResumen.html',
+        historial=historial,
+        user=user,
+        resumen=resumen
+    )
+
+
+@main.route('/HistorialPedidos')
+def historialPedido():
+    if 'id' not in session:
+        flash("Por favor, inicia sesión.", "warning")
+        return redirect(url_for('autenticacion.login'))
+
+    id_vendedor = session['id']
+
+    user = Usuarios.query.get(id_vendedor)
+    if not user:
+        flash("Usuario no encontrado.", "danger")
+        return redirect(url_for('autenticacion.login'))
+
+    historial = obtener_historial_pedidos_vendedor(id_vendedor)
+
+    return render_template('vendedor/historialPedidos.html', historial=historial, user=user)
+
 
 
 @main.route('/MiPerfil')
@@ -160,3 +215,53 @@ def mi_perfil():
     conn.close()
 
     return render_template('/vendedor/perfil.html', user=user)
+
+@main.route('/productos/editar/<int:id>', methods=['GET', 'POST'])
+def editar_producto(id):
+    try:
+        producto = Producto.query.get(id)
+        if not producto:
+            flash("El producto no existe o no se pudo cargar.", "error")
+            return redirect(url_for('vendedor_blueprint.mis_productos'))
+        
+        if request.method == 'POST':
+            producto.nombre = request.form['nombreProducto']
+            producto.categoria = request.form['categoria']
+            producto.cantidad = request.form['cantidad']
+            producto.precio = request.form['precio']
+            producto.descripcion = request.form['descripcionProducto']
+
+            imagen_file = request.files.get('imagen')
+            if imagen_file and imagen_file.filename != '':
+                producto.imagen = imagen_file.read()
+
+            db.session.commit()
+            flash("Producto actualizado correctamente.", "success")
+            return redirect(url_for('vendedor_blueprint.mis_productos'))
+        
+        return render_template('vendedor/editar_producto.html', producto=producto)
+
+    except Exception as e:
+        flash(f"Error al procesar la solicitud: {str(e)}", "error")
+        return redirect(url_for('vendedor_blueprint.mis_productos'))
+
+
+@main.route('/productos/eliminar/<int:id>', methods=['GET','POST'])
+def eliminar(id):
+    producto = Producto.query.get(id)
+
+    if not producto:
+        flash("El producto no existe.", "error")
+        return redirect(url_for('vendedor_blueprint.mis_productos'))
+
+    db.session.delete(producto)
+    db.session.commit()
+
+    flash("Producto eliminado correctamente.", "success")
+    return redirect(url_for('vendedor_blueprint.mis_productos'))
+
+@main.route('/logout')
+def logout():
+    session.clear()  # Elimina toda la información de la sesión
+    flash("Has cerrado sesión correctamente.", "success")
+    return redirect('/CULTIVARED/login')

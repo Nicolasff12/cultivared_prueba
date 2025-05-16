@@ -1,0 +1,30 @@
+{% extends 'comprador/baseComprador.html' %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/compras.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container compras-page py-5" style="margin-top:3rem !important;">
+  <h2 class="mb-4">Mis compras</h2>
+  {% if historial %}
+    {% for pedido in historial %}
+      <div class="card mb-3">
+        <div class="card-header">
+          Pedido #{{ pedido.id }} — {{ pedido.fecha.strftime('%Y-%m-%d %H:%M') }} — Total: ${{ '%.2f'|format(pedido.total) }}
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for item in pedido.items %}
+            <li class="list-group-item">
+              Producto ID {{ item.producto_id }} — Cantidad: {{ item.cantidad }} — Precio unitario: ${{ '%.2f'|format(item.precio) }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Aún no has realizado ninguna compra.</p>
+  {% endif %}
+</div>
+{% endblock %}

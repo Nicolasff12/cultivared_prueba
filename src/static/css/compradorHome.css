@@ -9,7 +9,7 @@
     
     /* Centramos la barra de búsqueda en la página */
     position: absolute;
-    top: 10%;
+    top: 10%;      /* antes estaba en 10% */
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -53,7 +53,7 @@
   .filters {
     background: #D9CAB3;
     border-radius: 8px;
-    width: 30%;
+    width: 20%;
     height: 40%;
     padding-right: 1px;
     font-family: 'Baloo 2';
@@ -144,7 +144,8 @@ input[type="range"]::-webkit-slider-thumb {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 250px;
+  max-width: 300px; width: 100%;
+  
 }
 
 /* Imagen de la tarjeta */
@@ -189,12 +190,28 @@ input[type="range"]::-webkit-slider-thumb {
   color: #4a3320;
 }
 
-.row {
-  margin-left: 0%;
-  margin-right: 0%;
-}
 
-.row > div {
-  padding-left: 0%;
-  padding-right: 0%;
-}
+/* --------------------------------------------------
+   Círculo en la esquina superior derecha de la tarjeta
+   -------------------------------------------------- */
+   .card.h-100 {
+    position: relative; /* para que .circle se posicione respecto a la carta */
+  }
+  
+  .card .circle {
+    position: absolute;
+    top: 10px;        /* espacio desde arriba */
+    right: 10px;      /* espacio desde la derecha */
+    width: 30px;      /* diámetro del círculo */
+    height: 30px;     /* diámetro del círculo */
+    background-color: #90323D; /* color de relleno */
+    border-radius: 50%;        /* lo hace redondo */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    /* opcional: centrar un icono o número dentro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }

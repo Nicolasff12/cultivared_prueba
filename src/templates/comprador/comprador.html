@@ -96,14 +96,27 @@
 
 
   <div class="product-cards-container">
-    <div class="row justify-content-center">
+    <div class="row g-4 justify-content-center">
       {% for p in producto %}
         <div class="col-md-3 col-sm-6 mb-4">
-          <div class="card h-100">
+          <div class="card h-100 position-relative">
+            
+            <!-- FORMULARIO para agregar al carrito -->
+            <form action="{{ url_for('comprador_blueprint.add_to_cart', product_id=p[0]) }}" method="post"
+                  style="position:absolute; top:10px; right:10px; z-index:10;">
+              <button type="submit" class="circle">+</button>
+            </form>
+            
             {% if p[3] %}
-              <img src="{{ p[3] }}" class="card-img-top" alt="Imagen de {{ p[1] }}">
+            <img src="{{ url_for('comprador_blueprint.imagen_producto', producto_id=p[0]) }}"
+              class="card-img-top" alt="Imagen del producto"
+              style="width: 100%; height: 200px; object-fit: cover;"
+              onerror="this.onerror=null; this.src='/static/img/default.png';"
+              loading="lazy">
+
             {% else %}
-              <img src="https://via.placeholder.com/300x200?text=Sin+Imagen" class="card-img-top" alt="Sin imagen">
+              <img src="https://via.placeholder.com/300x200?text=Sin+Imagen"
+                  class="card-img-top" alt="Sin imagen">
             {% endif %}
             <div class="card-body">
               <h5 class="card-title">{{ p[1] }}</h5>

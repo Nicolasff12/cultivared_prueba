@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+{% extends 'administrador/baseAdmin.html' %}
+
+{% block body %}
+<!-- Link al CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/adminperfil.css') }}">
+
+<!-- Contenedor -->
+<div class="container mt-5 editar-perfil">
+  <h1 class="text-center" id="panel-title">EDITAR PRODUCTO</h1>
+
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <!-- Tarjeta con la clase custom-card -->
+      <div class="card custom-card p-4">
+        
+        <!-- Formulario de edición -->
+        <form method="POST" action="{{ url_for('vendedor_blueprint.editar_producto', id=producto.id) }}" enctype="multipart/form-data">
+          <!-- ID oculto -->
+          <input type="hidden" name="id" value="{{ producto.id }}">
+
+          <!-- Fila 1: Código y Nombre -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Código de Producto</label>
+              <input type="text" class="form-control" value="{{ producto.id }}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nombre del Producto</label>
+              <input 
+                type="text" 
+                name="nombreProducto" 
+                class="form-control"
+                value="{{ producto.nombre }}"
+                required
+              >
+            </div>                     
+          </div>
+
+          <!-- Fila 2: Categoría y Precio -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Categoría</label>
+              <select name="categoria" class="form-control" required>
+                <option value="{{ producto.categoria }}" selected>{{ producto.categoria }}</option>
+                <option value="Frutas">Frutas</option>
+                <option value="Verduras">Verduras</option>
+                <option value="Granos">Granos</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Precio Unitario</label>
+              <input 
+                type="number" 
+                name="precio" 
+                class="form-control"
+                value="{{ producto.precio }}"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- Fila 3: Stock y Descripción -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Cantidad Disponible</label>
+              <input 
+                type="number" 
+                name="cantidad" 
+                class="form-control"
+                value="{{ producto.cantidad }}"
+                required
+              >
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Descripción</label>
+              <textarea 
+                name="descripcionProducto" 
+                class="form-control"
+                rows="3"
+                required
+              >{{ producto.descripcion }}</textarea>
+            </div>
+          </div>
+
+          <!-- Imagen actual -->
+          <div class="mb-3 text-center">
+            <label class="form-label"><strong>Imagen Actual:</strong></label>
+            <br>
+            <img src="{{ url_for('admin_blueprint.imagen_producto', producto_id=producto.id) }}" 
+                 alt="Imagen de {{ producto.nombre }}" width="120" height="120">
+          </div>
+
+          <!-- Carga nueva imagen -->
+          <div class="mb-3">
+            <label class="form-label">Actualizar Imagen (Opcional)</label>
+            <input type="file" class="form-control" name="imagen" accept="image/*">
+          </div>
+
+          <div class="d-flex justify-content-center mt-4">
+            <button type="submit" class="btn btn-secondary px-5">Guardar cambios</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

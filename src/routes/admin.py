@@ -1,7 +1,9 @@
 import io
-from flask import Flask, flash, render_template, Blueprint, request, redirect, send_file, url_for, session
+import os
+from flask import Flask, flash, render_template, Blueprint, request, redirect, send_file, url_for, session, send_file
 from config import get_connection
-from models import db, Usuarios, Producto
+from models import db, Usuarios, Producto, Transaccion, TransaccionItem
+
 
 # Definir el Blueprint antes de usarlo
 main = Blueprint('admin_blueprint', __name__)
@@ -395,6 +397,7 @@ def editar_usuario(id):
 
     return render_template('administrador/editar_usuario.html', usuario=usuario, user=user)
 
+# Definir la ruta de eliminar usuario
 @main.route('/usuarios/eliminar/<int:id>', methods=['POST'])
 def eliminar_usuario(id):
     if 'logueado' not in session or not session['logueado']:
@@ -474,3 +477,121 @@ def editar(user_id):
                 return """<script>alert("Usuario no encontrado."); window.location.href="/ADMINISTRADOR/perfil";</script>"""
     else:
         return """<script>alert("No estás logueado."); window.location.href="/CULTIVARED/login";</script>"""
+    
+# Definir la ruta de generar PDF
+import os
+from flask import send_file, session
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+
+@main.route('/generar_pdf', methods=['GET'])
+def exportar_reporte_general_pdf():
+    if 'logueado' not in session or not session['logueado']:
+        return """<script>alert("No estás logueado.");window.location.href="/CULTIVARED/login";</script>"""
+
+    ruta_static_real = os.path.join(os.getcwd(), "static", "reports")
+    os.makedirs(ruta_static_real, exist_ok=True)
+    ruta_pdf = os.path.join(ruta_static_real, "reporte_general.pdf")
+
+    doc = SimpleDocTemplate(ruta_pdf, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    title = Paragraph("<b>Reporte General - CULTIVARED</b>", styles["Title"])
+    elements.append(title)
+    elements.append(Spacer(1, 20))
+
+    # 📌 Sección de Usuarios
+    elements.append(Paragraph("<b>📌 Usuarios</b>", styles["Heading2"]))
+    elements.append(Spacer(1, 10))
+
+    usuarios = Usuarios.query.filter(Usuarios.rol.in_(['Vendedor', 'Comprador'])).all()
+    data_usuarios = [["ID", "Nombre", "Apellido", "Email"]]
+    for usuario in usuarios:
+        data_usuarios.append([usuario.id, usuario.nombre, usuario.apellido, usuario.email])
+
+    tabla_usuarios = Table(data_usuarios, colWidths=[50, 100, 100, 200])
+    tabla_usuarios.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(tabla_usuarios)
+    elements.append(Spacer(1, 20))
+
+    # 📌 Sección de Productos
+    elements.append(Paragraph("<b>📌 Productos</b>", styles["Heading2"]))
+    elements.append(Spacer(1, 10))
+
+    productos = Producto.query.all()
+    data_productos = [["ID", "Nombre", "Precio", "Stock"]]
+    for producto in productos:
+        data_productos.append([producto.id, producto.nombre, f"${producto.precio}", producto.cantidad])
+
+    tabla_productos = Table(data_productos, colWidths=[50, 150, 100, 80])
+    tabla_productos.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.green),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(tabla_productos)
+    elements.append(Spacer(1, 20))
+
+    # 📌 Sección de Transacciones
+    elements.append(Paragraph("<b>📌 Transacciones</b>", styles["Heading2"]))
+    elements.append(Spacer(1, 10))
+
+    transacciones = Transaccion.query.all()
+    data_transacciones = [["ID", "Usuario", "Total", "Estado"]]
+    for transaccion in transacciones:
+        data_transacciones.append([transaccion.id, transaccion.id_usuario, f"${transaccion.total}", transaccion.estado])
+
+    tabla_transacciones = Table(data_transacciones, colWidths=[50, 100, 100, 100])
+    tabla_transacciones.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(tabla_transacciones)
+
+    # Generar el PDF
+    doc.build(elements)
+
+    return send_file(ruta_pdf, as_attachment=True)
+
+# Definir la ruta de estadísticas
+from flask import render_template
+from sqlalchemy import func
+
+@main.route('/estadisticas', methods=['GET'])
+def estadisticas():
+    num_usuarios = Usuarios.query.count()
+    num_vendedores = Usuarios.query.filter_by(rol="Vendedor").count()
+    num_compradores = Usuarios.query.filter_by(rol="Comprador").count()
+
+    productos_mas_vendidos = db.session.query(Producto.nombre, func.count(Producto.id))\
+        .group_by(Producto.nombre)\
+        .order_by(func.count(Producto.id).desc()).limit(5).all()
+
+    productos_menos_vendidos = db.session.query(Producto.nombre, func.count(Producto.id))\
+        .group_by(Producto.nombre)\
+        .order_by(func.count(Producto.id).asc()).limit(5).all()
+
+    productos_stock = db.session.query(Producto.nombre, Producto.cantidad).all()
+
+    # Convertir datos a formato correcto
+    productos_stock = [{"nombre": p[0], "cantidad": p[1]} for p in productos_stock]
+
+    return render_template('administrador/admin_estadisticas.html', 
+                           num_usuarios=num_usuarios, 
+                           num_vendedores=num_vendedores,
+                           num_compradores=num_compradores,
+                           productos_mas_vendidos=[p[0] for p in productos_mas_vendidos],
+                           productos_menos_vendidos=[p[0] for p in productos_menos_vendidos],
+                           productos_stock=productos_stock)
