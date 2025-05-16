@@ -4,73 +4,93 @@
 <nav class="navbar sticky-top">
     <div class="container">
         <a href="/CULTIVARED" class="logo" title="CultivaRed"><span class="li">Cultiva</span>Red</a>            
-        <a href="{{ url_for('gestor_blueprint.perfil_usuario', user_id=user[0]) }}" class="text-white">Atras</a>
+        <a href="{{ url_for('gestor_blueprint.perfil_usuario', user_id=user[0]) }}" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-circle"></i> Atrás</a>
     </div>
 </nav>
 
+<div class="container my-5">
+  <h1 class="display-4 text-center mb-5">Dashboard de Estadísticas - {{ user[1] }}</h1>
 
-<div class="container mt-5">
-    <h3 class="mb-4">Ingresos por Mes</h3>
-    <canvas id="ingresosMesChart"></canvas>
+  <div class="row g-4 mb-5 text-center">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-4">
+        <h5>Total de Productos</h5>
+        <p class="fs-3">{{ resumen.total_productos }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-4">
+        <h5>Ingresos Totales</h5>
+        <p class="fs-3">${{ resumen.total_ganancias | round(2) }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-4">
+        <h5>Producto Más Popular</h5>
+        <p class="fs-3">{{ resumen.producto_mas_vendido }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-5">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-4">
+        <h4 class="text-center mb-4">Ingresos por Mes</h4>
+        <canvas id="ingresosChart" style="height:300px;"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-4">
+        <h4 class="text-center mb-4">Productos Más llamativos</h4>
+        <canvas id="productosChart" style="height:300px;"></canvas>
+      </div>
+    </div>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-var ctx = document.getElementById('ingresosMesChart').getContext('2d');
-var ingresosMesChart = new Chart(ctx, {
-    type: 'line', // Puedes usar 'bar' si prefieres barras
-    data: {
-        labels: {{ meses | tojson | default('[]') }}, // Ej: ["Enero", "Febrero", "Marzo"]
-        datasets: [{
-            label: 'Ingresos',
-            data: {{ ingresos_por_mes | tojson | default('[]') }}, // Ej: [500, 800, 1200]
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 2,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true
-    }
-});
-</script>
-
-
-
-
-<div class="container mt-5">
-    <h3 class="mb-4">Productos Más Vendidos</h3>
-    <canvas id="productosVendidosChart"></canvas>
-</div>
-
-<script>
-var ctx2 = document.getElementById('productosVendidosChart').getContext('2d');
-var productosVendidosChart = new Chart(ctx2, {
+  const ctxIngresos = document.getElementById('ingresosChart').getContext('2d');
+  new Chart(ctxIngresos, {
     type: 'bar',
     data: {
-        labels: {{ productos_mas_vendidos_nombres | tojson }}, // Ej: ["Tomate", "Papa", "Cebolla"]
-        datasets: [{
-            label: 'Cantidad Vendida',
-            data: {{ productos_mas_vendidos_cantidades | tojson }}, // Ej: [120, 80, 60]
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.6)',
-                'rgba(54, 162, 235, 0.6)',
-                'rgba(255, 206, 86, 0.6)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)'
-            ],
-            borderWidth: 1
-        }]
+      labels: {{ meses | tojson | default('[]') }},
+      datasets: [{
+        label: 'Ingresos',
+        data: {{ ingresos_por_mes | tojson | default('[]') }},
+        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+      }]
     },
     options: {
-        responsive: true
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
     }
-});
+  });
+
+  const ctxProductos = document.getElementById('productosChart').getContext('2d');
+  new Chart(ctxProductos, {
+    type: 'pie',
+    data: {
+      labels: {{ productos_mas_vendidos_nombres | tojson | default('[]') }},
+      datasets: [{
+        label: 'Cantidad Vendida',
+        data: {{ productos_mas_vendidos_cantidades | tojson | default('[]') }},
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
 </script>
-
-
 
 {% endblock %}

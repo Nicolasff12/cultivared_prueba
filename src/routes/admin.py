@@ -477,9 +477,10 @@ def editar(user_id):
                 return """<script>alert("Usuario no encontrado."); window.location.href="/ADMINISTRADOR/perfil";</script>"""
     else:
         return """<script>alert("No estás logueado."); window.location.href="/CULTIVARED/login";</script>"""
-    
+
+
 # Definir la ruta de generar PDF
-import os
+"""import os
 from flask import send_file, session
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
@@ -490,7 +491,7 @@ from reportlab.lib import colors
 @main.route('/generar_pdf', methods=['GET'])
 def exportar_reporte_general_pdf():
     if 'logueado' not in session or not session['logueado']:
-        return """<script>alert("No estás logueado.");window.location.href="/CULTIVARED/login";</script>"""
+        return <script>alert("No estás logueado.");window.location.href="/CULTIVARED/login";</script>
 
     ruta_static_real = os.path.join(os.getcwd(), "static", "reports")
     os.makedirs(ruta_static_real, exist_ok=True)
@@ -564,7 +565,7 @@ def exportar_reporte_general_pdf():
     doc.build(elements)
 
     return send_file(ruta_pdf, as_attachment=True)
-
+"""
 # Definir la ruta de estadísticas
 from flask import render_template
 from sqlalchemy import func

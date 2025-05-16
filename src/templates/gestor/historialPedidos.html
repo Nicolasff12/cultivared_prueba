@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% block body %}
 
+<link rel="stylesheet" href="https://bootswatch.com/5/litera/bootstrap.min.css"> 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/historialPedido.css') }}">
+
 <nav class="navbar sticky-top">
     <div class="container">
         <a href="/CULTIVARED" class="logo" title="CultivaRed"><span class="li">Cultiva</span>Red</a>            
-        <a href="{{ url_for('gestor_blueprint.perfil_usuario', user_id=user[0]) }}" class="text-white">Atras</a>
+        <a href="{{ url_for('gestor_blueprint.perfil_usuario', user_id=user[0]) }}" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-circle"></i> Atrás</a>
     </div>
 </nav>
 
@@ -13,26 +17,39 @@
     <h2 class="mb-4">Historial de Pedidos</h2>
     
     <div class="table-responsive">
-        <table class="table table-striped table-hover table-bordered">
-            <thead class="table-dark">
+        {% if historial %}
+        <table border="1" cellpadding="5">
+            <thead>
+                
+
                 <tr>
-                    <th>#</th>
                     <th>Producto</th>
                     <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                    <th>Total</th>
-                    <th>Fecha de Venta</th>
+                    <th>Precio unitario</th>
+                    <th>Fecha de pedido</th>
+                    <th>
+                         {% set rol = user[6].lower().strip() %}
+                            {% if rol == 'vendedor' %}
+                                Comprador
+                            {% elif rol == 'comprador' %}
+                                Vendedor
+                            {% else %}
+                                Usuario
+                            {% endif %}
+                    </th>
+                    <th>Total item</th>
                 </tr>
             </thead>
             <tbody>
-                {% for detalle, transaccion, producto in historial %}
+                {% for item in historial %}
+
                 <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ producto.nombre }}</td>
-                    <td>{{ detalle.cantidad }}</td>
-                    <td>${{ detalle.precio_unitario }}</td>
-                    <td>${{ (detalle.precio_unitario * detalle.cantidad) | round(2) }}</td>
-                    <td>{{ transaccion.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ item[3] }}</td> <!-- nombre_producto -->
+                    <td>{{ item[1] }}</td> <!-- cantidad -->
+                    <td>${{ '%.2f'|format(item[2]) }}</td> <!-- precio unitario -->
+                    <td>{{ item[4].strftime('%Y-%m-%d') }}</td> <!-- fecha -->
+                    <td>{{ item[5] }}</td> <!-- nombre_comprador -->
+                    <td>${{ '%.2f'|format(item[1] * item[2]) }}</td> <!-- total -->
                 </tr>
                 {% else %}
                 <tr>
@@ -41,6 +58,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    {% else %}
+        <p>No hay ventas registradas aún.</p>
+    {% endif %}
     </div>
 </div>
 

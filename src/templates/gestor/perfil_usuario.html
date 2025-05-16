@@ -15,7 +15,8 @@
     <nav class="navbar sticky-top">
         <div class="container">
             <a href="/CULTIVARED" class="logo" title="CultivaRed"><span class="li">Cultiva</span>Red</a>  
-            <a href="/GESTOR/gestion_usuarios" class="text-white">Atras</a>          
+            <a href="/GESTOR/gestion_usuarios" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left-circle"></i> >Atras</a>          
         </div>
 
 
@@ -44,20 +45,24 @@
     
                     <!-- Card del Menú -->
                     <div class="card menu-card">
-                        <div class="card-header text-center">
-                            <h4 class="text-center">Menu de {{ user[1] }} {{ user[2] }}</h4>
-                        </div>
-                        <div class="card-body">
-                            <ul class="menu-list">
-                                <!-- aqui vienen estadisticas, inventario, graficos -->
+    <div class="card-header text-center">
+        <h4 class="text-center">Menu de {{ user[1] }} {{ user[2] }}</h4>
+                </div>
+                    <div class="card-body">
+                        <ul class="menu-list">
+                            <!-- Mostrar solo si el rol es vendedor -->
+                            {% if rol_usuario.strip().lower() == 'vendedor' %}
                                 <li><a href="{{ url_for('gestor_blueprint.inventario_usuario', user_id=user[0]) }}">Ver Inventario</a></li>
-                                <li><a href="#">Reportes:</a></li>
-                                <li><a href="{{ url_for('gestor_blueprint.historial_pedidos', user_id=user[0]) }}">Historial de pedidos</a></li>
-                                <li><a href="{{ url_for('gestor_blueprint.resumen_ventas', user_id=user[0]) }}">Resumen de ventas</a></li>
-                                <a href="{{ url_for('gestor_blueprint.grafico_vendedor', user_id=user[0]) }}">Gráficos</a> <!-- Correcto -->
-                            </ul>
-                        </div>    
-                    </div>
+                            {% endif %}
+
+                            <li><a href="#">Reportes:</a></li>
+                            <li><a href="{{ url_for('gestor_blueprint.historial_pedidos', user_id=user[0]) }}">Historial de pedidos</a></li>
+                            <li><a href="{{ url_for('gestor_blueprint.resumen_ventas', user_id=user[0]) }}">Resumen de {{user[6]}}</a></li>
+                            <a href="{{ url_for('gestor_blueprint.grafico_vendedor', user_id=user[0]) }}">Gráficos</a>
+                        </ul>
+                    </div>    
+                </div>
+
                 </div>
             </div>
         </div>
